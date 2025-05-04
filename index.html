@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Registration</title>
+    <style>
+        :root {
+            --primary: #5d3fd3;
+            --primary-light: #7b66e5;
+            --secondary: #ff6b6b;
+            --tertiary: #4ecdc4;
+            --dark: #2d3436;
+            --light: #f9f9f9;
+            --gray: #dfe6e9;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .left-panel {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .right-panel {
+            flex: 1.5;
+            background-color: white;
+            padding: 40px;
+        }
+
+        h1, h2 {
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .left-panel h1, .left-panel h2 {
+            color: white;
+        }
+
+        p {
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--gray);
+            border-radius: 5px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(93, 63, 211, 0.2);
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: var(--primary-light);
+        }
+
+        .secondary-button {
+            background-color: var(--light);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .secondary-button:hover {
+            background-color: var(--gray);
+        }
+
+        .switch-form {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .switch-form a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .message {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .success {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .error {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .left-panel, .right-panel {
+                flex: 1;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <h1>Welcome to Your To-Do List</h1>
+            <p>Create an account to start organizing and tracking your tasks. Stay focused, stay productive, and never miss a deadline.</p>
+            <div id="benefits">
+                <h2>Features</h2>
+                <p>✓ Easy task creation and management</p>
+                <p>✓ Prioritize and categorize your to-dos</p>
+                <p>✓ Set reminders and deadlines</p>
+                <p>✓ Sync across all your devices</p>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div id="message" class="message"></div>
+            
+            <!-- Registration Form -->
+            <div id="registration-form">
+                <h1>Create Account</h1>
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm Password</label>
+                        <input type="password" id="confirm-password" required>
+                    </div>
+                    <button type="submit">Register</button>
+                </form>
+                <div class="switch-form">
+                    Already have an account? <a href="#" id="switch-to-login">Login</a>
+                </div>
+            </div>
+            
+            <!-- Login Form -->
+            <div id="login-form" style="display: none;">
+                <h1>Log In</h1>
+                <form id="login-form-element">
+                    <div class="form-group">
+                        <label for="login-username">Username</label>
+                        <input type="text" id="login-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit">Login</button>
+                </form>
+                <div class="switch-form">
+                    Don't have an account? <a href="#" id="switch-to-register">Register</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store users in local storage
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        
+        // DOM Elements
+        const registrationForm = document.getElementById('registration-form');
+        const loginForm = document.getElementById('login-form');
+        const messageElement = document.getElementById('message');
+        
+        // Check if user is already logged in
+        window.addEventListener('load', function() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser) {
+                // Redirect to index page if already logged in
+                window.location.href = 'To Do.html';
+            }
+        });
+        
+        // Switch between forms
+        document.getElementById('switch-to-login').addEventListener('click', function(e) {
+            e.preventDefault();
+            registrationForm.style.display = 'none';
+            loginForm.style.display = 'block';
+        });
+        
+        document.getElementById('switch-to-register').addEventListener('click', function(e) {
+            e.preventDefault();
+            loginForm.style.display = 'none';
+            registrationForm.style.display = 'block';
+        });
+        
+        // Register Form Submit
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            // Validation
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match', 'error');
+                return;
+            }
+            
+            if (users.some(user => user.username === username)) {
+                showMessage('Username already exists', 'error');
+                return;
+            }
+            
+            // Create user object
+            const user = {
+                username,
+                email,
+                password, // In a real app, you'd hash this password
+                profileData: {
+                    fullName: '',
+                    bio: '',
+                    preferences: {
+                        darkMode: false,
+                        notifications: true,
+                        newsletter: false
+                    }
+                }
+            };
+            
+            // Save user
+            users.push(user);
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            // Set as current user
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            
+            showMessage('Account created successfully! Redirecting...', 'success');
+            
+            // Redirect to index.html after registration
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
+        });
+        
+        // Login Form Submit
+        document.getElementById('login-form-element').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            // Find user
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (!user) {
+                showMessage('Invalid username or password', 'error');
+                return;
+            }
+            
+            // Login successful
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            
+            showMessage('Login successful! Redirecting...', 'success');
+            
+            // Redirect to index.html after login
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        });
+        
+        // Show message function
+        function showMessage(text, type) {
+            messageElement.textContent = text;
+            messageElement.className = `message ${type}`;
+            messageElement.style.display = 'block';
+            
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

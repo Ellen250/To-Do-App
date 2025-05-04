@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Notebook</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #5d3fd3;
+            --primary-light: #7b66e5;
+            --secondary: #ff6b6b;
+            --tertiary: #4ecdc4;
+            --dark: #2d3436;
+            --light: #f9f9f9;
+            --gray: #dfe6e9;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f6f9;
+            line-height: 1.6;
+            color: var(--dark);
+        }
+        .notebook-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .notebook-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary);
+        }
+        .note-input {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .section-input input, #noteTitle, #noteContent {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid var(--gray);
+            border-radius: 8px;
+        }
+        .color-picker {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s ease;
+        }
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        .color-option.selected {
+            border-color: var(--dark);
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.2);
+        }
+        .sections-container {
+            margin-bottom: 15px;
+        }
+        .section-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .section-item-preview {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-color-preview {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+        .remove-section {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+        }
+        .notes-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .note {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            position: relative;
+        }
+        .note-title {
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        .note-section {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .note-section-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .truncated-content {
+            max-height: 150px;
+            overflow: hidden;
+            position: relative;
+        }
+        .truncated-content::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(transparent, white);
+        }
+        .view-more-content, .view-full-btn, .edit-note, .delete-note {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 5px;
+        }
+        .view-more-content:hover, .view-full-btn:hover, .edit-note:hover, .delete-note:hover {
+            background-color: var(--primary-light);
+        }
+        #noteModal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            padding-top: 50px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+        }
+        .close-modal {
+            color: var(--danger);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .edit-mode {
+            border: 2px solid var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="notebook-container">
+        <h1 class="notebook-header">Advanced Notebook</h1>
+        
+        <div class="note-input">
+            <input type="text" id="noteTitle" placeholder="Note Title" style="margin-bottom: 15px;">
+            
+            <div class="sections-container" id="sectionsContainer"></div>
+            
+            <div class="section-input">
+                <input type="text" id="sectionTitle" placeholder="Section Title (Optional)">
+                <div class="color-picker" id="colorPicker">
+                    <div class="color-option" style="background-color: #5d3fd3" data-color="#5d3fd3"></div>
+                    <div class="color-option" style="background-color: #ff6b6b" data-color="#ff6b6b"></div>
+                    <div class="color-option" style="background-color: #4ecdc4" data-color="#4ecdc4"></div>
+                    <div class="color-option" style="background-color: #2ecc71" data-color="#2ecc71"></div>
+                    <div class="color-option" style="background-color: #f39c12" data-color="#f39c12"></div>
+                    <div class="color-option" style="background-color: #3498db" data-color="#3498db"></div>
+                </div>
+                <button class="add-section-btn" id="addSectionBtn">Add Section</button>
+            </div>
+            
+            <textarea id="sectionContent" placeholder="Section Content (Optional)" rows="4" style="width: 100%; padding: 10px; margin-top: 10px; border: 1px solid var(--gray); border-radius: 8px;"></textarea>
+            
+            <textarea id="noteContent" placeholder="Note Content" rows="6" style="width: 100%; padding: 10px; margin-top: 15px; border: 1px solid var(--gray); border-radius: 8px;"></textarea>
+            
+            <button class="add-note-btn" id="addNoteBtn" style="margin-top: 15px;">Create Note</button>
+        </div>
+        
+        <div class="notes-container" id="notesContainer"></div>
+    </div>
+
+    <div id="noteModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="modalNoteContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Color picker functionality
+        const colorOptions = document.querySelectorAll('.color-option');
+        const sectionsContainer = document.getElementById('sectionsContainer');
+        const notesContainer = document.getElementById('notesContainer');
+        const noteTitle = document.getElementById('noteTitle');
+        const noteContent = document.getElementById('noteContent');
+        const sectionTitleInput = document.getElementById('sectionTitle');
+        const sectionContentInput = document.getElementById('sectionContent');
+        const addSectionBtn = document.getElementById('addSectionBtn');
+        const addNoteBtn = document.getElementById('addNoteBtn');
+        const noteModal = document.getElementById('noteModal');
+        const modalNoteContent = document.getElementById('modalNoteContent');
+        const closeModal = document.querySelector('.close-modal');
+
+        let selectedColor = '#5d3fd3'; // Default color
+        let noteSections = []; // Store sections for the current note
+        let isEditMode = false;
+        let editingNoteElement = null;
+
+        // Color selection
+        function initializeColorPicker() {
+            colorOptions.forEach(option => {
+                option.classList.remove('selected');
+                option.addEventListener('click', () => {
+                    colorOptions.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    selectedColor = option.getAttribute('data-color');
+                });
+            });
+            
+            // Set default color
+            document.querySelector('.color-option[data-color="#5d3fd3"]').classList.add('selected');
+        }
+        initializeColorPicker();
+
+        // Add section functionality
+        addSectionBtn.addEventListener('click', () => {
+            const title = sectionTitleInput.value.trim();
+            const content = sectionContentInput.value.trim();
+
+            if (title || content) {
+                // Create section object
+                const section = {
+                    title,
+                    content,
+                    color: selectedColor
+                };
+
+                // Add to sections array
+                noteSections.push(section);
+
+                // Update sections preview
+                updateSectionsPreview();
+
+                // Clear inputs
+                sectionTitleInput.value = '';
+                sectionContentInput.value = '';
+            }
+        });
+
+        // Update sections preview
+        function updateSectionsPreview() {
+            sectionsContainer.innerHTML = noteSections.map((section, index) => `
+                <div class="section-item">
+                    <div class="section-item-preview">
+                        <div class="section-color-preview" style="background-color: ${section.color}"></div>
+                        <span>${section.title}</span>
+                    </div>
+                    <button class="remove-section" data-index="${index}">🗑️</button>
+                </div>
+            `).join('');
+
+            // Add remove section event listeners
+            document.querySelectorAll('.remove-section').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = e.target.getAttribute('data-index');
+                    noteSections.splice(index, 1);
+                    updateSectionsPreview();
+                });
+            });
+        }
+
+        // Create or Edit note functionality
+        addNoteBtn.addEventListener('click', () => {
+            const title = noteTitle.value.trim();
+            const content = noteContent.value.trim();
+
+            if (!title && !content && noteSections.length === 0) {
+                alert('Please add a note title, content, or at least one section');
+                return;
+            }
+
+            if (isEditMode && editingNoteElement) {
+                // Update existing note
+                updateExistingNote(editingNoteElement);
+            } else {
+                // Create new note
+                createNewNote();
+            }
+        });
+
+        function createNewNote() {
+            // Create note element
+            const noteElement = document.createElement('div');
+            noteElement.classList.add('note');
+
+            // Prepare note content with truncation
+            const noteContentHTML = generateNoteContent(
+                noteTitle.value.trim(), 
+                noteContent.value.trim(), 
+                [...noteSections]
+            );
+
+            noteElement.innerHTML = noteContentHTML;
+            addNoteInteractivity(noteElement);
+
+            // Add note to container
+            notesContainer.appendChild(noteElement);
+
+            // Reset inputs and sections
+            resetNoteInputs();
+        }
+
+        function updateExistingNote(noteElement) {
+            // Generate new content
+            const newNoteContent = generateNoteContent(
+                noteTitle.value.trim(), 
+                noteContent.value.trim(), 
+                [...noteSections]
+            );
+
+            // Update the note's inner HTML
+            noteElement.innerHTML = newNoteContent;
+            addNoteInteractivity(noteElement);
+
+            // Reset edit mode
+            isEditMode = false;
+            editingNoteElement = null;
+            addNoteBtn.textContent = 'Create Note';
+
+            // Reset inputs and sections
+            resetNoteInputs();
+        }
+
+        function generateNoteContent(title, content, sections) {
+            return `
+                ${title ? `<h2 class="note-title">${title}</h2>` : ''}
+                
+                ${sections.length > 0 ? `
+                    <div class="note-sections">
+                        ${sections.map(section => `
+                            <div class="note-section" style="background-color: ${section.color}24">
+                                <div class="note-section-title" style="color: ${section.color}">${section.title}</div>
+                                <div>${section.content}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                
+                ${content ? `
+                    <div class="truncated-content">
+                        <div class="note-main-content">${content}</div>
+                    </div>
+                    <button class="view-more-content">View Full Content</button>
+                ` : ''}
+                
+                <div class="note-actions">
+                    <button class="view-full-btn">View Full Note</button>
+                    <button class="edit-note">Edit Note</button>
+                    <button class="delete-note">🗑️ Delete Note</button>
+                </div>
+            `;
+        }
+
+        function addNoteInteractivity(noteElement) {
+            // View more content functionality
+            const truncatedContent = noteElement.querySelector('.truncated-content');
+            const viewMoreContentBtn = noteElement.querySelector('.view-more-content');
+            if (viewMoreContentBtn && truncatedContent) {
+                viewMoreContentBtn.addEventListener('click', () => {
+                    truncatedContent.style.maxHeight = 'none';
+                    truncatedContent.style.overflow = 'visible';
+                    truncatedContent.style.position = 'static';
+                    viewMoreContentBtn.style.display = 'none';
+                });
+            }
+
+            // View full note modal
+            const viewFullBtn = noteElement.querySelector('.view-full-btn');
+            viewFullBtn.addEventListener('click', () => {
+                modalNoteContent.innerHTML = noteElement.innerHTML;
+                noteModal.style.display = 'block';
+            });
+
+            // Edit note functionality
+            const editBtn = noteElement.querySelector('.edit-note');
+            editBtn.addEventListener('click', () => {
+                // Populate inputs with note content
+                const titleElement = noteElement.querySelector('.note-title');
+                const mainContentElement = noteElement.querySelector('.note-main-content');
+                const sectionElements = noteElement.querySelectorAll('.note-section');
+
+                // Reset sections
+                noteSections = [];
+                sectionsContainer.innerHTML = '';
+
+                // Populate title
+                if (titleElement) {
+                    noteTitle.value = titleElement.textContent;
+                }
+
+                // Populate main content
+                if (mainContentElement) {
+                    noteContent.value = mainContentElement.textContent;
+                }
+
+                // Populate sections
+                sectionElements.forEach(sectionEl => {
+                    const titleEl = sectionEl.querySelector('.note-section-title');
+                    const contentEl = sectionEl.querySelector('div:last-child');
+                    
+                    if (titleEl && contentEl) {
+                        const sectionColor = titleEl.style.color;
+                        
+                        noteSections.push({
+                            title: titleEl.textContent,
+                            content: contentEl.textContent,
+                            color: rgbToHex(sectionColor)
+                        });
+                    }
+                });
+
+                // Update sections preview
+                updateSectionsPreview();
+
+                // Set edit mode
+                isEditMode = true;
+                editingNoteElement = noteElement;
+                addNoteBtn.textContent = 'Update Note';
+
+                // Scroll to top
+                window.scrollTo(0, 0);
+            });
+
+            // Delete note functionality
+            const deleteBtn = noteElement.querySelector('.delete-note');
+            deleteBtn.addEventListener('click', () => {
+                notesContainer.removeChild(noteElement);
+            });
+        }
+
+        function resetNoteInputs() {
+            // Reset inputs and sections
+            noteTitle.value = '';
+            noteContent.value = '';
+            noteSections = [];
+            sectionsContainer.innerHTML = '';
+            
+            // Reset color picker
+            initializeColorPicker();
+        }
+
+        // Utility function to convert RGB to Hex
+        function rgbToHex(rgb) {
+            // Check if it's already a hex color
+            if (rgb.startsWith('#')) return rgb;
+
+            // Extract RGB values
+            const match = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+            if (!match) return '#5d3fd3'; // Default color
+
+            // Convert to hex
+            const [r, g, b] = match.slice(1).map(Number);
+            return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+        }
+
+        // Close modal
+        closeModal.addEventListener('click', () => {
+            noteModal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside of it
+        window.addEventListener('click', (event) => {
+            if (event.target === noteModal) {
+                noteModal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
